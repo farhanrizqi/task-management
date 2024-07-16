@@ -21,7 +21,7 @@ export class TasksRepository extends Repository<Task> {
     } catch (error) {
       throw new NotFoundException('No tasks found with the provided filters.');
     }
-  }
+  } 
 
   async getFilteredTasks(filterDto: GetTasksFilterDto): Promise<Task[]> {
     const { status, search } = filterDto;
@@ -32,9 +32,10 @@ export class TasksRepository extends Repository<Task> {
     }
 
     if (search) {
+      const fuzzySearch = `%${search.split('').join('%')}%`; // Konversi ke format fuzzy search
       query = query.andWhere(
         '(LOWER(task.title) LIKE LOWER(:search) OR LOWER(task.description) LIKE LOWER(:search))',
-        { search: `%${search}%` },
+        { search: fuzzySearch },
       );
     }
     const tasks = await query.getMany();

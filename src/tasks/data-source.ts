@@ -1,5 +1,6 @@
 import { DataSource } from 'typeorm';
 import { Task } from './task.entity';
+import { User } from 'src/auth/user.entity';
 
 export const AppDataSource = new DataSource({
   type: 'postgres',
@@ -8,6 +9,6 @@ export const AppDataSource = new DataSource({
   username: 'postgres',
   password: 'admin',
   database: 'task-management',
-  entities: [Task],
+  entities: [Task, User],
   synchronize: true,
 });

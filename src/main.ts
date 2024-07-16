@@ -1,13 +1,25 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { ValidationPipe } from '@nestjs/common';
+import { BadRequestException, ValidationPipe } from '@nestjs/common';
 import 'reflect-metadata';
 import { AppDataSource } from './tasks/data-source';
 import { HttpExceptionFilter } from './http-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
-  app.useGlobalPipes(new ValidationPipe())
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
+    exceptionFactory: (errors) => {
+      return new BadRequestException(
+        errors.map((error) => ({
+          property: error.property,
+          constraints: error.constraints,
+        })),
+      );
+    },
+  }))
   app.useGlobalFilters(new HttpExceptionFilter());
   await app.listen(3000);
 }

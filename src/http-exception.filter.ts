@@ -1,30 +1,33 @@
-// http-exception.filter.ts
-
-import { ExceptionFilter, Catch, ArgumentsHost, HttpStatus } from '@nestjs/common';
-import { Response } from 'express';
-import { NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { ExceptionFilter, Catch, ArgumentsHost, HttpException, HttpStatus, Logger } from '@nestjs/common';
 
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
-  catch(error: Error, host: ArgumentsHost) {
-    const ctx = host.switchToHttp();
-    const response = ctx.getResponse<Response>();
+  private readonly logger = new Logger(HttpExceptionFilter.name);
 
-    if (error instanceof NotFoundException) {
-      response.status(HttpStatus.NOT_FOUND).json({
-        statusCode: HttpStatus.NOT_FOUND,
-        message: error.message,
-      });
-    } else if (error instanceof InternalServerErrorException) {
-      response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: error.message,
-      });
-    } else {
-      response.status(HttpStatus.INTERNAL_SERVER_ERROR).json({
-        statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
-        message: 'Internal server error',
-      });
-    }
+  catch(exception: unknown, host: ArgumentsHost) {
+    const ctx = host.switchToHttp();
+    const response = ctx.getResponse();
+    const request = ctx.getRequest();
+    const status =
+      exception instanceof HttpException
+        ? exception.getStatus()
+        : HttpStatus.INTERNAL_SERVER_ERROR;
+
+    const errorResponse = {
+      statusCode: status,
+      timestamp: new Date().toISOString(),
+      path: request.url,
+      method: request.method,
+      message:
+        exception instanceof HttpException
+          ? exception.getResponse()
+          : 'Internal server error',
+    };
+
+    this.logger.error(
+      `HTTP Status: ${status} Error Message: ${JSON.stringify(errorResponse)}`,
+    );
+
+    response.status(status).json(errorResponse);
   }
 }
