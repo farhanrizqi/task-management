@@ -1,6 +1,6 @@
 import { Like, Repository } from 'typeorm';
 import { Task } from './task.entity';
-import { AppDataSource } from './data-source';
+import { AppDataSource } from 'src/data-source';
 import { CreateTaskDto } from './DTO/create-task.dto';
 import { TaskStatus } from './task-status';
 import {
