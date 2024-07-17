@@ -4,12 +4,14 @@ import { ValidationPipe } from '@nestjs/common';
 import 'reflect-metadata';
 import { AppDataSource } from './data-source';
 import { HttpExceptionFilter } from './http-exception.filter';
+import { TransformInterceptor } from './transform.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // !Global Middleware
   app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalInterceptors(new TransformInterceptor);
   app.useGlobalFilters(new HttpExceptionFilter);
 
   // const { httpAdapter } = app.get(HttpAdapterHost);

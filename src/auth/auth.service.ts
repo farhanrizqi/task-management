@@ -23,7 +23,7 @@ export class AuthService {
 
   async signUp(
     authCredentialsDto: AuthCredentialsDto,
-  ): Promise<{ user: User; message: string }> {
+  ): Promise<{ code:number, message: string, data: User }> {
     return this.usersRepository.createUser(authCredentialsDto);
 
     // * Different logic
@@ -35,7 +35,7 @@ export class AuthService {
 
   async login(
     loginCredentialsDto: LoginCredentialsDto,
-  ): Promise<{ message: string; token: string }> {
+  ): Promise<{code:number, message: string; token: string }> {
     const { username, password } = loginCredentialsDto;
 
     const user = await this.usersRepository.findOne({ where: { username } });
@@ -44,7 +44,11 @@ export class AuthService {
       const payload: JwtPayload = { username };
       const token = this.jwtService.sign(payload); // Pastikan jwtService sudah diinisialisasi dengan benar
 
-      return { message: 'Login Success', token };
+      return { 
+        code: 200, 
+        message: 'Login Success',
+        token 
+      };
     } else {
       throw new UnauthorizedException('Invalid credentials');
     }

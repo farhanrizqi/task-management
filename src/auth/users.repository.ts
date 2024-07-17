@@ -31,7 +31,7 @@ export class UsersRepository extends Repository<User> {
 
   async createUser(
     authCredentialsDto: AuthCredentialsDto,
-  ): Promise<{ user: User; message: string }> {
+  ): Promise<{ code:number, message: string, data: User }> {
     const { username, password } = authCredentialsDto;
 
     // hashing
@@ -42,7 +42,11 @@ export class UsersRepository extends Repository<User> {
 
     try {
       await this.save(user);
-      return { user, message: 'User created successfully' };
+      return { 
+        code: 201,
+        message: 'User created successfully',
+        data: user
+      };
     } catch (error) {
       if (error.code === '23505') {
         // duplicate username

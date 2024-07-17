@@ -4,7 +4,8 @@ import {
   Post,
   Logger,
   UnauthorizedException,
-  InternalServerErrorException
+  InternalServerErrorException,
+  Get
 } from '@nestjs/common';
 import { AuthCredentialsDto } from './DTO/auth-credentials.dto';
 import { AuthService } from './auth.service';
@@ -16,10 +17,15 @@ export class AuthController {
   private readonly logger = new Logger(AuthController.name);
   constructor(private authService: AuthService) {}
 
+  @Get('/list')
+  async getAllUsers(): Promise<User[]> {
+    return await this.authService.getAllUsers();
+  }
+
   @Post('/signup')
   async signUp(
     @Body() authCredentialsDto: AuthCredentialsDto,
-  ): Promise<{ user: User; message: string }> {
+  ): Promise<{ code: number,  message: string, data: User }> {
     const result = await this.authService.signUp(authCredentialsDto);
     return result;
     // this.logger.log('Received request:', JSON.stringify(authCredentialsDto));
@@ -36,7 +42,7 @@ export class AuthController {
   @Post('/login')
   async login(
     @Body() loginCredentialsDto: LoginCredentialsDto,
-  ): Promise<{ message: string; token: string }> {
+  ): Promise<{ code:number, message: string; token: string }> {
     try {
         return await this.authService.login(loginCredentialsDto);
       } catch (error) {

@@ -18,50 +18,59 @@ import { UpdateTaskDto } from './DTO/update-task.dto';
 import { GetTasksFilterDto } from './DTO/get-tasks-filter.dto';
 import { Task } from './task.entity';
 import { AuthGuard } from '@nestjs/passport';
+import { User } from 'src/auth/user.entity';
+import { GetUser } from 'src/auth/get-user.decorator';
 
 @Controller('tasks')
 @UseGuards(AuthGuard())
 export class TasksController {
   constructor(private tasksService: TasksService) {}
 
+  // @Get()
+  // async getTasks(@Query() filterDto: GetTasksFilterDto, @GetUser() user:User): Promise<Task[]> {
+  //   try {
+  //     if (Object.keys(filterDto).length === 0) {
+  //       return await this.tasksService.getAll(user);
+  //     } else {
+  //       return await this.tasksService.getFilteredTasks(filterDto, user);
+  //     }
+  //   } catch (error) {
+  //     if (error instanceof NotFoundException || error instanceof InternalServerErrorException) {
+  //       throw error;
+  //     } else {
+  //       throw new InternalServerErrorException('Internal server error');
+  //     }
+  //   }
+  // }
+
   @Get()
-  async getTasks(@Query() filterDto: GetTasksFilterDto): Promise<Task[]> {
-    try {
-      if (Object.keys(filterDto).length === 0) {
-        return await this.tasksService.getAll();
-      } else {
-        return await this.tasksService.getFilteredTasks(filterDto);
-      }
-    } catch (error) {
-      if (error instanceof NotFoundException || error instanceof InternalServerErrorException) {
-        throw error; // Rethrow the caught error to let Nest handle it
-      } else {
-        throw new InternalServerErrorException('Internal server error');
-      }
-    }
+  async getTasks(@Query()filterDto: GetTasksFilterDto, @GetUser() user:User): Promise<{code: number, message: string, data: Task[]}> {
+    return await this.tasksService.getFilteredTasks(filterDto, user);
   }
+
   
   @Get('/:id')
-  getTaskById(@Param('id') id:string): Promise<Task>{
-    return this.tasksService.getTaskById(id);
+  getTaskById(@Param('id') id:string, @GetUser() user: User): Promise<{code: number, message: string, data: Task}>{
+    return this.tasksService.getTaskById(id, user);
   }
 
   @Post()
-  createTask(@Body() createTaskDto: CreateTaskDto): Promise<Task> {
-    return this.tasksService.createTask(createTaskDto);
-  }
-
-  @Delete('/:id')
-  async deleteTask(@Param('id') id: string): Promise<{ message: string, code: number }> {
-    return this.tasksService.deleteTask(id);
+  createTask(@Body() createTaskDto: CreateTaskDto, @GetUser()user:User): Promise<{code: number, message: string, data: Task}> {
+    return this.tasksService.createTask(createTaskDto, user);
   }
 
   @Put('/:id')
   async updateTask(
     @Param('id') id: string,
     @Body() updateTaskDto: UpdateTaskDto,
-  ): Promise<Task> {
-    return this.tasksService.updateTask(id, updateTaskDto);
+    @GetUser() user: User
+  ): Promise<{code: number, message: string, data: Task}> {
+    return this.tasksService.updateTask(id, updateTaskDto, user);
+  }
+
+  @Delete('/:id')
+  async deleteTask(@Param('id') id: string, @GetUser() user: User): Promise<{ message: string, code: number }> {
+    return this.tasksService.deleteTask(id, user);
   }
 
 

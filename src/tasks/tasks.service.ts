@@ -1,10 +1,11 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateTaskDto } from './DTO/create-task.dto';
 import { UpdateTaskDto } from './DTO/update-task.dto';
 import { GetTasksFilterDto } from './DTO/get-tasks-filter.dto';
 import { TasksRepository } from './tasks.repository';
 import { Task } from './task.entity';
 import { TaskStatus } from './task-status';
+import { User } from 'src/auth/user.entity';
 
 @Injectable()
 export class TasksService {
@@ -12,28 +13,27 @@ constructor(
     private tasksRepository: TasksRepository,
 ) {}
 
-async getAll(): Promise<Task[]> {
-  return await this.tasksRepository.find();
+// async getAll(user:User): Promise<Task[]> {
+//   return await this.tasksRepository.getAll(user);
+// }
+
+async getFilteredTasks(filterDto: GetTasksFilterDto, user:User): Promise<{code: number, message: string, data: Task[]}> {
+  return await this.tasksRepository.getFilteredTasks(filterDto, user);
+}
+async getTaskById(id: string, user:User): Promise<{code: number, message: string, data: Task}> {
+  return this.tasksRepository.getTaskById(id, user);
 }
 
-async getFilteredTasks(filterDto: GetTasksFilterDto): Promise<Task[]> {
-  return await this.tasksRepository.getFilteredTasks(filterDto);
-}
-async getTaskById(id: string): Promise<Task> {
-  return this.tasksRepository.getTaskById(id);
+async createTask(createTaskDto: CreateTaskDto, user:User): Promise<{code: number, message: string, data: Task}> {
+  return this.tasksRepository.createTask(createTaskDto, user);
 }
 
-async createTask(createTaskDto: CreateTaskDto): Promise<Task> {
-  // Perform any business logic here (e.g., validation, default values)
-  return this.tasksRepository.createTask(createTaskDto);
+async deleteTask(id: string, user: User): Promise<{ code: number, message: string }> {
+  return this.tasksRepository.deleteTask(id, user);
 }
 
-async deleteTask(id: string): Promise<{ message: string, code: number }> {
-  return this.tasksRepository.deleteTask(id);
-}
-
-async updateTask(id: string, updateTaskDto: UpdateTaskDto): Promise<Task> {
-  return this.tasksRepository.updateTask(id, updateTaskDto);
+async updateTask(id: string, updateTaskDto: UpdateTaskDto, user:User): Promise<{code: number, message: string, data: Task}> {
+  return this.tasksRepository.updateTask(id, updateTaskDto, user);
 }
 
 

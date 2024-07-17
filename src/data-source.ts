@@ -1,5 +1,5 @@
 import { DataSource } from 'typeorm';
-import { Task } from './task.entity';
+import { Task } from 'src/tasks/task.entity';
 import { User } from 'src/auth/user.entity';
 
 export const AppDataSource = new DataSource({
